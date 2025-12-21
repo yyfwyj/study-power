@@ -1,0 +1,54 @@
+<script>
+  let xhr = new XMLHttpRequest();
+  xhr.open(
+    "GET",
+    "http://127.0.0.1:4523/m1/7590620-7329073-default/xhrStudy/demo01",
+    true
+  );
+  // xhr中自定义请求头简直对方法，这个方法接受两个参数，键名和键值
+  // 必须在open方法之后，send之前调用
+  // 注意：键值只能写英文字母、数字、标点、西欧字符（如 é, ñ）
+  xhr.setRequestHeader("ctmd", "cnmd");
+  xhr.send(null);
+  /**
+   * HTTP XML头部
+   * Accept: 浏览器可以处理的内容类型
+   * Accept-Charset：浏览器可以显示的字符集
+   * Accept-Encoding: 浏览器可以处理的压缩编码类型 Gzip 以及 br（brolit）最常使用
+   * Accept-Language：浏览器使用的语言，也就是用户尝尝使用的语言，可以根据这个属性值来做国际化开发
+   * Connection：浏览器与服务器的链接类型，通常是keep-alive，也就是长链接，可以复用链接，减少链接建立和关闭的开销
+   * Cookie：浏览器发送给服务器的Cookie信息，服务器可以设置Cookie，浏览器会自动发送给服务器
+   * Host：浏览器请求的服务器域名，也就是请求的URL的域名
+   * Referer：浏览器请求的来源URL，也就是请求的URL的来源
+   * User-Agent：浏览器的信息，也就是浏览器的信息，可以根据这个属性值来做浏览器兼容性开发
+   * Authorization：浏览器请求的认证信息，也就是浏览器请求的认证信息，可以根据这个属性值来做认证开发
+   * Cache-Control：浏览器请求的缓存控制信息，也就是浏览器请求的缓存控制信息，可以根据这个属性值来做缓存开发
+   * Pragma：浏览器请求的缓存控制信息，也就是浏览器请求的缓存控制信息，可以根据这个属性值来做缓存开发
+   * Expires：浏览器请求的缓存控制信息，也就是浏览器请求的缓存控制信息，可以根据这个属性值来做缓存开发
+   */
+  // 获取响应头数据' 注意，想要获取到对应的数据，需要在onreadystatechange事件中，且readyState值为4的时候，才能够正常获取
+  // 这里只会输出
+  // content-length: 31
+  // content-type: application/json; charset=utf-8
+  // 因为我是跨域，所以不会输出其他数据，只会输出浏览器认为安全的数据
+  // 当我给响应头设置了：Access-Control-Expose-Headers: success, date, vary
+  // 那么我就可以获取到 success, date, vary 对应的数据
+  // 如果设置的是 *，那么就可以获取到所有数据
+  /**
+   * access-control-allow-credentials: true
+    access-control-allow-origin: http://127.0.0.1:5500
+    access-control-expose-headers: *
+    connection: keep-alive
+    content-length: 31
+    content-type: application/json; charset=utf-8
+    date: Fri, 19 Dec 2025 13:15:14 GMT
+    keep-alive: timeout=5
+    success: false
+    vary: Origin
+    */
+  xhr.onreadystatechange = () => {
+    if (xhr.readyState === 4) {
+      console.table(xhr.getAllResponseHeaders());
+    }
+  };
+</script>

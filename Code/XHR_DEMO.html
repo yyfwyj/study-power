@@ -1,0 +1,58 @@
+<script>
+// let xhr  = new XMLHttpRequest(); // 所有的XHR都需先new 一个实例出来
+// xhr.open("GET","http://127.0.0.1:4523/m1/7590620-7329073-default/xhrStudy/demo01", false);
+// xhr.send(null); 
+// send方法接受一个参数，这个参数是作为请求体发送的数据，如果不需要发送请求体，则必须传null
+// 因为这个参数在某些浏览器中是必须的
+
+/**
+ * XHR 的响应体
+ * responseText： 响应体返回文本
+ * responseXML: 如果响应内容类型是“text/xml”或者“application/xml”，那就是包含相应数据的XML DOM文档
+ * status：响应的HTTP状态
+ * statusText： 响应的HTTP状态描述
+ */
+// console.table(xhr);
+
+
+// 关于readyState与readystatechange事件
+// let xhr = new XMLHttpRequest();
+// xhr.onreadystatechange = () => {
+//     console.log(xhr.readyState,"readyState会有变化吗？");
+// }
+// xhr.open("GET","http://127.0.0.1:4523/m1/7590620-7329073-default/xhrStudy/demo01", true);
+
+// xhr.send(null);
+// 问题：onreadystatechange事件，所处位置不一致，输出的数据也不一样。同时，同步和异步和位置都会影响到输出内容的不同
+// 注意：onreadystatechange是xhr的属性，不是函数，我们需要给xhr绑定好函数，然后打开并发送请求才能够查看到对应的输出
+
+// 我们一个一个来拆解上面的问题
+// 首先是位置不同，当xhr.onreadystatechange事件在不同位置，输出的数据也不一样。
+let xhr = new XMLHttpRequest();
+xhr.onreadystatechange = () => {
+    switch (xhr.readyState) {
+        case 0: 
+            console.log("未初始化，尚未调用open方法，值：0");
+            break;
+        case 1:
+            console.log("已打开，已经调用open方法 ，尚未调用send方法，值：1");
+            break;
+        case 2:
+            console.log("已发送，已经调用send方法，尚未接收到响应，值：2");
+            break;
+        case 3:
+            console.log("接受中，已经收到部分响应，值：3");
+            break;
+        case 4:
+            console.log("完成，已经收到所有响应数据，值：4")
+            break;
+    }
+}
+xhr.open("GET","http://127.0.0.1:4523/m1/7590620-7329073-default/xhrStudy/demo01", false);
+
+xhr.send(null);
+
+// 只有直接调用onreadystatechange事件的时候，才会直接返回值：0，否则都是从1开始（如果直接在xhr定义之前调用会报错）
+// 其次，onreadystatechange所处位置 不同，会略过一些状态变化，例如onreadystatechange事件，在open之后定义，那么是无法观察到open状态变化的
+// 同时，我们需要注意
+</script>
