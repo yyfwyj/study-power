@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Progress Events Demo</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .progress-container {
+        margin: 20px 0;
+      }
+      .progress-bar {
+        width: 100%;
+        height: 20px;
+        background-color: #f0f0f0;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .progress-fill {
+        height: 100%;
+        background-color: #4caf50;
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+      .status {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #666;
+      }
+      button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+      .result {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        border-left: 4px solid #007bff;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .result h3 {
+        margin: 0 0 10px 0;
+        color: #333;
+        font-size: 16px;
+      }
+      .result p {
+        margin: 5px 0;
+        font-family: monospace;
+        font-size: 13px;
+        word-break: break-all;
+      }
+      .json-preview {
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 3px;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-height: 150px;
+        overflow-y: auto;
+      }
+      .explanation {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #e7f3ff;
+        border-radius: 4px;
+        border-left: 4px solid #007bff;
+      }
+      .explanation h3 {
+        margin: 0 0 10px 0;
+        color: #0056b3;
+      }
+      .explanation ul {
+        margin: 10px 0;
+        padding-left: 20px;
+      }
+      .explanation li {
+        margin: 5px 0;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Progress Events 演示</h1>
+    <p>点击按钮发送请求，观察进度条的变化</p>
+
+    <button id="sendRequest">发送请求 (10MB 数据)</button>
+
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+      <div id="status" class="status">等待开始...</div>
+    </div>
+
+    <div id="result" class="result" style="display: none">
+      <h3>请求结果</h3>
+      <p><strong>数据总长度:</strong> <span id="dataLength"></span> 字符</p>
+      <p><strong>数据大小:</strong> <span id="dataSize"></span> MB</p>
+      <p><strong>数组长度:</strong> <span id="arrayLength"></span> 项</p>
+      <div class="json-preview" id="jsonPreview"></div>
+    </div>
+
+    <div class="explanation">
+      <h3>🚀 Progress 事件详解</h3>
+      <ul>
+        <li>
+          <strong>Progress 事件的作用：</strong
+          >在接收大数据时，提供实时的下载进度反馈
+        </li>
+        <li>
+          <strong>为什么需要它：</strong
+          >对于大文件下载，用户需要知道进度，避免界面假死
+        </li>
+        <li>
+          <strong>关键属性：</strong>
+          <ul>
+            <li><code>event.loaded</code> - 已接收的字节数</li>
+            <li>
+              <code>event.total</code> - 总字节数（需要服务器提供 Content-Length
+              头）
+            </li>
+            <li><code>event.lengthComputable</code> - 是否能计算进度</li>
+          </ul>
+        </li>
+        <li>
+          <strong>本示例演示：</strong>
+          <ul>
+            <li>下载 10MB JSON 数据</li>
+            <li>实时显示进度条和百分比</li>
+            <li>显示已接收字节数和总字节数</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <script>
+      const progressFillDOM = document.getElementById("progressFill");
+      const sendRequestDOM = document.getElementById("sendRequest");
+      const statusDOM = document.getElementById("status");
+      const resultDOM = document.getElementById("result");
+
+      const xhr = new XMLHttpRequest();
+
+      sendRequestDOM.addEventListener("click", () => {
+        progressFillDOM.style.width = "0%";
+        statusDOM.textContent = "开始请求...";
+        sendRequestDOM.textContent = "请求中...";
+
+        xhr.onload = () => {
+          progressFillDOM.style.width = "100%";
+          statusDOM.textContent = "请求完成！";
+          sendRequestDOM.disabled = false;
+          sendRequestDOM.textContent = "重新发送请求 (10MB 数据)";
+        };
+
+        xhr.onprogress = (event) => {
+          console.log(event);
+        };
+
+        xhr.open(
+          "GET",
+          "http://127.0.0.1:4523/m1/7590620-7329073-default/xhrStudy/demo01",
+          true
+        );
+        xhr.send(null);
+      });
+
+      /*
+        Progress Events 详解：
+        ===================
+
+        什么是 Progress 事件？
+        - 在 XMLHttpRequest 接收数据期间反复触发的事件
+        - 允许开发者实时跟踪下载进度
+        - 特别适用于大文件下载或大量数据传输
+
+        为什么需要 Progress 事件？
+        - 改善用户体验：显示进度条避免界面"假死"
+        - 提供反馈：用户知道请求正在进行
+        - 允许取消：可以基于进度决定是否中断请求
+
+        Progress 事件的 event 对象包含：
+        - event.loaded: 已接收的字节数
+        - event.total: 总字节数（需要服务器提供 Content-Length 头）
+        - event.lengthComputable: 进度信息是否可用
+
+        使用注意事项：
+        - 必须在 xhr.open() 之前设置 onprogress 处理器
+        - 对于大数据量请求特别有用
+        - 可以与 AbortController 结合使用实现取消功能
+        */
+
+      // const sendButton = document.getElementById('sendRequest');
+      // const progressFill = document.getElementById('progressFill');
+      // const statusDiv = document.getElementById('status');
+      // const resultDiv = document.getElementById('result');
+
+      // sendButton.addEventListener('click', function() {
+      //     // 重置状态
+      //     progressFill.style.width = '0%';
+      //     statusDiv.textContent = '开始请求...';
+      //     resultDiv.style.display = 'none';
+      //     sendButton.disabled = true;
+      //     sendButton.textContent = '请求中...';
+
+      //     const xhr = new XMLHttpRequest();
+
+      //     // onload 事件处理
+      //     xhr.onload = function(event) {
+      //         sendButton.disabled = false;
+      //         sendButton.textContent = '发送请求 (10MB 数据)';
+
+      //         if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+      //             statusDiv.textContent = '✅ 请求完成！数据接收完毕';
+
+      //             try {
+      //                 const responseData = JSON.parse(xhr.responseText);
+      //                 const dataLength = xhr.responseText.length;
+      //                 const dataSizeMB = (dataLength / (1024 * 1024)).toFixed(2);
+      //                 const arrayLength = responseData.data ? responseData.data.length : 'N/A';
+
+      //                 // 更新结果显示
+      //                 document.getElementById('dataLength').textContent = dataLength.toLocaleString();
+      //                 document.getElementById('dataSize').textContent = dataSizeMB;
+      //                 document.getElementById('arrayLength').textContent = arrayLength.toLocaleString();
+
+      //                 // 格式化JSON预览
+      //                 const jsonPreview = JSON.stringify(responseData, null, 2).substring(0, 500);
+      //                 document.getElementById('jsonPreview').textContent = jsonPreview + '\n...';
+
+      //                 resultDiv.style.display = 'block';
+      //             } catch (error) {
+      //                 // 如果JSON解析失败，显示原始文本
+      //                 document.getElementById('dataLength').textContent = xhr.responseText.length.toLocaleString();
+      //                 document.getElementById('dataSize').textContent = (xhr.responseText.length / (1024 * 1024)).toFixed(2);
+      //                 document.getElementById('arrayLength').textContent = '解析失败';
+      //                 document.getElementById('jsonPreview').textContent = xhr.responseText.substring(0, 200) + '...';
+      //                 resultDiv.style.display = 'block';
+      //             }
+      //         } else {
+      //             statusDiv.textContent = '请求失败: ' + xhr.status + ' ' + xhr.statusText;
+      //         }
+      //     };
+
+      //     // onprogress 事件处理 - 这就是Progress事件的魔力所在！
+      //     xhr.onprogress = function(event) {
+      //         const statusElement = document.getElementById("status");
+
+      //         if (event.lengthComputable) {
+      //             const percentComplete = (event.loaded / event.total) * 100;
+      //             progressFill.style.width = percentComplete + '%';
+
+      //             // 显示详细的进度信息
+      //             const loadedMB = (event.loaded / (1024 * 1024)).toFixed(2);
+      //             const totalMB = (event.total / (1024 * 1024)).toFixed(2);
+
+      //             statusElement.innerHTML = `
+      //                 <strong>📊 下载进度:</strong> ${percentComplete.toFixed(2)}%<br>
+      //                 <strong>📦 数据接收:</strong> ${loadedMB}MB / ${totalMB}MB<br>
+      //                 <strong>🔢 字节详情:</strong> ${event.loaded.toLocaleString()} / ${event.total.toLocaleString()} 字节
+      //             `;
+      //         } else {
+      //             // 如果无法计算进度（服务器没提供Content-Length）
+      //             const loadedMB = (event.loaded / (1024 * 1024)).toFixed(2);
+      //             statusElement.innerHTML = `
+      //                 <strong>📊 正在接收数据...</strong><br>
+      //                 <strong>📦 已接收:</strong> ${loadedMB}MB (${event.loaded.toLocaleString()} 字节)<br>
+      //                 <strong>ℹ️ 总大小未知</strong> (服务器未提供Content-Length头)
+      //             `;
+      //         }
+      //     };
+
+      //     // 错误处理
+      //     xhr.onerror = function() {
+      //         statusDiv.textContent = '网络错误';
+      //         sendButton.disabled = false;
+      //         sendButton.textContent = '发送请求 (10MB 数据)';
+      //     };
+
+      //     // 超时处理
+      //     xhr.timeout = 30000; // 30秒超时
+      //     xhr.ontimeout = function() {
+      //         statusDiv.textContent = '请求超时';
+      //         sendButton.disabled = false;
+      //         sendButton.textContent = '发送请求 (10MB 数据)';
+      //     };
+
+      //     // 发送请求
+      //     xhr.open("GET", "http://127.0.0.1:4523/m1/7590620-7329073-default/xhrStudy/demo01", true);
+      //     xhr.send(null);
+      // });
+    </script>
+  </body>
+</html>

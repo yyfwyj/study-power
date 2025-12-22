@@ -1,0 +1,32 @@
+<script>
+GET请求
+  let xhr = new XMLHttpRequest();
+
+  // xhr.open("GET","http://127.0.0.1:4523/m1/7590620-7329073-default/xhrStudy/demo01?demo=123&demo=456", true);
+
+  //   function addURLParams(url, name, value) {
+  //     url += url.indexOf("?") === -1 ? "?" : "&";
+  //     return (url += encodeURIComponent(name) + "=" + encodeURIComponent(value));
+  //   }
+
+  //   let url = "http://127.0.0.1:4523/m1/7590620-7329073-default/xhrStudy/demo01";
+
+  //   url = addURLParams(url, "demo", "123");
+  //   url = addURLParams(url, "demo", "456");
+  // xhr.open("GET", url, true);
+
+  // 1. 问题1：为什么需要使用encodeURIComponet来处理参数进行传参
+  // 因为有一些参数值，可能会包含（如 &, =, 空格、中文等）特殊字符，
+  // 如果没有通过encodeURIComponent进行编码，可能导致服务器解析错误
+//   xhr.open(
+//     "GET",
+//     "http://127.0.0.1:4523/m1/7590620-7329073-default/xhrStudy/demo01?demo=你好&demo=我 不 好",
+//     true
+//   );
+  // 解析出来的：http://127.0.0.1:4523/m1/7590620-7329073-default/xhrStudy/demo01?demo=%E4%BD%A0%E5%A5%BD&demo=%E6%88%91%20%E4%B8%8D%20%E5%A5%BD
+  // 但是现代浏览器可能会对于特殊字符进行自动编码，所以可能不需要使用encodeURIComponent进行编码，但最好不要依赖
+
+
+
+//   xhr.send();
+</script>
