@@ -10,6 +10,7 @@
         max-width: 800px;
         margin: 0 auto;
         padding: 20px;
+        background-color: #f5f5f5;
       }
       .progress-container {
         margin: 20px 0;
@@ -31,6 +32,10 @@
         margin-top: 10px;
         font-size: 14px;
         color: #666;
+      }
+      .button-container {
+        display: flex;
+        gap: 10px;
       }
       button {
         padding: 10px 20px;
@@ -106,7 +111,12 @@
     <h1>Progress Events 演示</h1>
     <p>点击按钮发送请求，观察进度条的变化</p>
 
-    <button id="sendRequest">发送请求 (10MB 数据)</button>
+    <div class="button-container">
+      <button id="sendRequest">发送请求</button>
+      <button id="cancelRequest" disabled="true">取消请求</button>
+      <button id="suspendRequest" disabled="true">暂停请求</button>
+      <button id="continueRequest" disabled="true">继续请求</button>
+    </div>
 
     <div class="progress-container">
       <div class="progress-bar">
@@ -119,7 +129,6 @@
       <h3>请求结果</h3>
       <p><strong>数据总长度:</strong> <span id="dataLength"></span> 字符</p>
       <p><strong>数据大小:</strong> <span id="dataSize"></span> MB</p>
-      <p><strong>数组长度:</strong> <span id="arrayLength"></span> 项</p>
       <div class="json-preview" id="jsonPreview"></div>
     </div>
 
@@ -159,8 +168,14 @@
     <script>
       const progressFillDOM = document.getElementById("progressFill");
       const sendRequestDOM = document.getElementById("sendRequest");
+      const cancelRequestDOM = document.getElementById("cancelRequest");
+      const suspendRequestDOM = document.getElementById("suspendRequest");
+      const continueRequestDOM = document.getElementById("continueRequest");
       const statusDOM = document.getElementById("status");
       const resultDOM = document.getElementById("result");
+      const dataLengthDOM = document.getElementById("dataLength");
+      const dataSizeDOM = document.getElementById("dataSize");
+      const jsonPreviewDOM = document.getElementById("jsonPreview");
 
       const xhr = new XMLHttpRequest();
 
@@ -168,16 +183,36 @@
         progressFillDOM.style.width = "0%";
         statusDOM.textContent = "开始请求...";
         sendRequestDOM.textContent = "请求中...";
+        sendRequestDOM.disabled = true;
+        dataLengthDOM.textContent = "0";
+        cancelRequestDOM.disabled = false;
+        suspendRequestDOM.disabled = false;
+        continueRequestDOM.disabled = false;
 
         xhr.onload = () => {
           progressFillDOM.style.width = "100%";
           statusDOM.textContent = "请求完成！";
           sendRequestDOM.disabled = false;
-          sendRequestDOM.textContent = "重新发送请求 (10MB 数据)";
+          sendRequestDOM.textContent = "重新发送请求 ";
+          resultDOM.style.display = "block";
+          const data = JSON.parse(xhr.responseText); // 先解析成对象
+          const preview = JSON.stringify(data, null, 2).substring(0, 1000); // 再格式化并截断
+          jsonPreviewDOM.textContent = preview;
         };
 
         xhr.onprogress = (event) => {
           console.log(event);
+          const percentComplete = (event.loaded / event.total) * 100;
+          const loadedMB = (event.loaded / 1024 / 1024).toFixed(2);
+          const totalMb = (event.total / 1024 / 1024).toFixed(2);
+          dataLengthDOM.textContent = event.total;
+          dataSizeDOM.textContent = loadedMB;
+          progressFillDOM.style.width = percentComplete + "%";
+          statusDOM.innerHTML = `
+              <strong>📊 下载进度:</strong> ${percentComplete.toFixed(2)}%<br>
+              <strong>📦 数据接收:</strong> ${loadedMB}MB / ${totalMb}MB<br>
+              <strong>🔢 字节详情:</strong> ${event.loaded.toLocaleString()} / ${event.total.toLocaleString()} 字节
+          `;
         };
 
         xhr.open(
@@ -188,30 +223,21 @@
         xhr.send(null);
       });
 
-      /*
-        Progress Events 详解：
-        ===================
-
-        什么是 Progress 事件？
-        - 在 XMLHttpRequest 接收数据期间反复触发的事件
-        - 允许开发者实时跟踪下载进度
-        - 特别适用于大文件下载或大量数据传输
-
-        为什么需要 Progress 事件？
-        - 改善用户体验：显示进度条避免界面"假死"
-        - 提供反馈：用户知道请求正在进行
-        - 允许取消：可以基于进度决定是否中断请求
-
-        Progress 事件的 event 对象包含：
-        - event.loaded: 已接收的字节数
-        - event.total: 总字节数（需要服务器提供 Content-Length 头）
-        - event.lengthComputable: 进度信息是否可用
-
-        使用注意事项：
-        - 必须在 xhr.open() 之前设置 onprogress 处理器
-        - 对于大数据量请求特别有用
-        - 可以与 AbortController 结合使用实现取消功能
-        */
+      cancelRequestDOM.addEventListener("click",()=> {
+        console.log("取消请求");
+        xhr.abort();
+        cancelRequestDOM.disabled = true;
+        suspendRequestDOM.disabled = true;
+        continueRequestDOM.disabled = true;
+        sendRequestDOM.disabled = false;
+        progressFillDOM.style.width = "0%";
+        statusDOM.textContent = "请求取消！";
+        sendRequestDOM.textContent = "重新发送请求 ";
+        resultDOM.style.display = "none";
+        jsonPreviewDOM.textContent = "";
+        dataLengthDOM.textContent = "0";
+        dataSizeDOM.textContent = "0";
+      })
 
       // const sendButton = document.getElementById('sendRequest');
       // const progressFill = document.getElementById('progressFill');
@@ -231,7 +257,7 @@
       //     // onload 事件处理
       //     xhr.onload = function(event) {
       //         sendButton.disabled = false;
-      //         sendButton.textContent = '发送请求 (10MB 数据)';
+      //         sendButton.textContent = '发送请求 ';
 
       //         if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
       //             statusDiv.textContent = '✅ 请求完成！数据接收完毕';
@@ -297,7 +323,7 @@
       //     xhr.onerror = function() {
       //         statusDiv.textContent = '网络错误';
       //         sendButton.disabled = false;
-      //         sendButton.textContent = '发送请求 (10MB 数据)';
+      //         sendButton.textContent = '发送请求 ';
       //     };
 
       //     // 超时处理
@@ -305,7 +331,7 @@
       //     xhr.ontimeout = function() {
       //         statusDiv.textContent = '请求超时';
       //         sendButton.disabled = false;
-      //         sendButton.textContent = '发送请求 (10MB 数据)';
+      //         sendButton.textContent = '发送请求 ';
       //     };
 
       //     // 发送请求

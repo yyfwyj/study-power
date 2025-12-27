@@ -1,0 +1,15 @@
+<script>
+    let abortController = new AbortController();
+    fetch("http://127.0.0.1:4523/m1/7590620-7329073-default/xhrStudy/demo01", {
+        signal: abortController.signal
+    }).then(res => {
+        console.log(res);
+    }).catch(err => {
+        console.log(err);
+    });
+
+
+    setTimeout(() => {
+        abortController.abort();
+    }, 10);
+</script>

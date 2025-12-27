@@ -1,10 +1,3 @@
-JavaScript 中如何中止网络请求？
-主要思路：
-无论是使用的axios，还是fetchAPI实现的接口，都可以通过AbortController的方法来中止请求。
-AbortController的使用方法如下：
-1. axios：
-
-```
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
     // 1. 创建一个AbortController的实例
@@ -29,8 +22,3 @@ AbortController的使用方法如下：
         controller.abort();
     },100)
 </script>
-```
-AbortController 提供一个标准化的“中止信号”（AbortSignal），当你把 signal 传给 fetch 或 axios，它们会在内部监听这个信号。一旦你调用 controller.abort()，这些 API 就会：
-① 利用浏览器能力真正中断网络请求（释放资源），
-② 同时reject 它们返回的 Promise，告知你“请求已被取消”。
-而原生 Promise 因不监听 signal，故无法被取消。
