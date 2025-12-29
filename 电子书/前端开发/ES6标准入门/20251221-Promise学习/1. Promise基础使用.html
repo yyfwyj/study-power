@@ -1,0 +1,15 @@
+<script>
+    const promise = new Promise((resolve,reject) => {
+        if(false) {
+            resolve('Promise resolve 执行成功');
+        } else {
+            reject('Promise reject 执行失败');
+        }
+    })
+    
+    promise.then((value)=> {
+        console.log('Promise then',value);
+    }, (error) => {
+        console.log('Promise catch',error);
+    })
+</script>

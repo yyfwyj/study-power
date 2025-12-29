@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue 指令示例</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue3-sfc-loader@0.8.4/dist/vue3-sfc-loader.js"></script>
+
+    <script>
+      const { defineAsyncComponent, createApp } = Vue;
+      const { loadModule } = window['vue3-sfc-loader'];
+
+      const options = {
+        moduleCache: { vue: Vue },
+        async getFile(url) {
+          const res = await fetch(url);
+          if (!res.ok) {
+            throw Object.assign(new Error(res.statusText + ' ' + url), { res });
+          }
+          return await res.text();
+        },
+        addStyle(textContent) {
+          const style = document.createElement('style');
+          style.textContent = textContent;
+          document.head.appendChild(style);
+        },
+      };
+
+      const vpre = defineAsyncComponent(() =>
+        loadModule('./v-pre.vue', options)
+      );
+
+      createApp({
+        components: { vpre },
+        template: '<vpre />',
+      }).mount('#app');
+    </script>
+  </body>
+</html>
