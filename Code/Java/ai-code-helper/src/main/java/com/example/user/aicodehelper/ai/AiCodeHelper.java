@@ -15,7 +15,7 @@ public class AiCodeHelper {
 
     // 引入ChatModel Bean 这个就是我们通过依赖引入的大模型
     @Resource
-    private ChatModel qwenchatModel;
+    private ChatModel qwenChatModel;
 
     // 3.特性 SystemMessage 系统提示词，我们可以通过系统提示词来引导AI，设置AI身份，让AI的回答更加准确以及高效
     // 需要注意一下，系统提示词最好只有一个发送给大模型，否则新的提示词会替换旧的提示词
@@ -32,7 +32,7 @@ public class AiCodeHelper {
     // 特性：ChatModel，这是一个最基本的文本聊天方法
     public String chat(String message) {
         UserMessage userMessage = UserMessage.from(message);
-        ChatResponse chatResponse = qwenchatModel.chat(userMessage);
+        ChatResponse chatResponse = qwenChatModel.chat(userMessage);
         AiMessage aiMessage = chatResponse.aiMessage();
         log.info("ai 输出:" + aiMessage.toString());
         return aiMessage.text();
@@ -41,7 +41,7 @@ public class AiCodeHelper {
     // 2. 简单对话 - 自定义用户消息
     // 特性：多模态，可以支持给AI发送多种类型的消息，例如：文本、图片、音频、视频等等，但是需要知道AI本身是否支持这个功能
     public String chatWithMessage(UserMessage userMessage) {
-        ChatResponse chatResponse = qwenchatModel.chat(userMessage);
+        ChatResponse chatResponse = qwenChatModel.chat(userMessage);
         AiMessage aiMessage = chatResponse.aiMessage();
         log.info("ai 输出:" + aiMessage.toString());
         return aiMessage.text();
@@ -51,7 +51,7 @@ public class AiCodeHelper {
     public String chatWithSystemMessage(String message) {
         SystemMessage systemMessage = SystemMessage.from(SYSTEM_MESSAGE);
         UserMessage userMessage =  UserMessage.from( message);
-        ChatResponse chatResponse = qwenchatModel.chat(systemMessage, userMessage);
+        ChatResponse chatResponse = qwenChatModel.chat(systemMessage, userMessage);
         AiMessage aiMessage = chatResponse.aiMessage();
         log.info("ai 输出:" + aiMessage.toString());
         return aiMessage.text();

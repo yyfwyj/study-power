@@ -33,4 +33,6 @@ class AiCodeHelperApplicationTests {
     void chatWithSystemMessage() {
         aiCodeHelper.chatWithSystemMessage("我想学AI，将AI集成到现有项目并且前端展示，应该学习什么知识");
     }
+
+
 }
