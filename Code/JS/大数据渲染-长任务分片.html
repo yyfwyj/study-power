@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      const xhr = new XMLHttpRequest();
+
+      xhr.open(
+        "GET",
+        "http://127.0.0.1:4523/m1/7590620-7329073-default/bigData/array",
+        true
+      );
+
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            console.time("渲染时间");
+            const { data } = JSON.parse(xhr.responseText);
+
+            // 如果直接渲染，页面直接崩溃了
+            // for(let i = 0; i < data.length; i++) {
+            //     const item = data[i];
+            //     const divDOM = document.createElement("div");
+            //     divDOM.innerHTML = `
+            //         <div>${item.id}</div>
+            //         <div>${item.firstname}${item.lastname}</div>
+            //         <div>${item.age}</div>
+            //     `;
+            //     document.body.appendChild(divDOM);
+            // }
+
+            // 长任务分片渲染
+            function renderLargeData(data) {
+                const BATCH_SIZE = 1000;
+                const DELAY = 16;
+
+                let currentIndex = 0;
+
+                function renderBatch() {
+                    const startTime = Date.now();
+                    // 0+1000 < 100000 1000
+                    const endIndex = Math.min(currentIndex + BATCH_SIZE, data.length);
+
+                    for (let i = currentIndex; i < endIndex; i++) {
+                        // 创建DOM元素并且添加到页面
+                        const item = document.createElement("div");
+                        item.textContent = `${data[i].id} ${data[i].firstname}${data[i].lastname} ${data[i].age}`;
+                        document.body.appendChild(item);
+                    }
+
+                    currentIndex = endIndex;
+
+                    if (currentIndex < data.length) {
+                        // 控制执行脚本，避免过度占用CPU
+                        const elapsed = Date.now() - startTime;
+                        const nextDelay = Math.max(0,DELAY - elapsed);
+
+                        setTimeout(renderBatch, nextDelay);
+                    }
+                }
+
+                renderBatch();
+
+            }
+
+            renderLargeData(data);
+
+            console.log("请求成功:", xhr.responseText);
+            console.timeEnd("渲染时间");
+          } else {
+            console.error("请求失败:", xhr.status, xhr.statusText);
+          }
+        }
+      };
+
+      xhr.send(null);
+    </script>
+  </body>
+</html>
